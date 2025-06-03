@@ -163,13 +163,37 @@ const App: React.FC = () => {
 
   const cancelEditing = () => resetForm();
 
-  // 4) Usuwanie tylko lokalnie (nie usuwamy z bazy)
-  const handleDelete = (index: number) => {
+  const handleDelete = async (index: number) => {
+    const recipe = recipes[index];
+    if (!recipe.id) return;
+
     if (!window.confirm("Na pewno chcesz usunąć ten przepis?")) return;
-    const newList = [...recipes];
-    newList.splice(index, 1);
-    setRecipes(newList);
-    resetForm();
+
+    try {
+      const res = await fetch(`${API_BASE}/removeRecipes.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: recipe.id }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Nieznany błąd przy usuwaniu");
+      }
+      const json = await res.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      // Usuń przepis ze stanu
+      setRecipes((prev) => {
+        const copy = [...prev];
+        copy.splice(index, 1);
+        return copy;
+      });
+      resetForm();
+    } catch (err: any) {
+      console.error("removeRecipes error:", err);
+      alert("Nie udało się usunąć przepisu. " + (err.message || ""));
+    }
   };
 
   const filteredRecipes = recipes.filter((rec) => {
