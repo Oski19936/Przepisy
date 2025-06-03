@@ -43,4 +43,4 @@ jobs:
           USERNAME: oski1993
 
         run: |
-          scp -r -o StrictHostKeyChecking=no build/. "oski1993@oski1993.ssh.dhosting.pl"
+          scp -r -o StrictHostKeyChecking=no build/. "oski1993@oski1993.ssh.dhosting.pl:/home/klient.dhosting.pl/oski1993/przepisy.dkonto.pl/public_html"
