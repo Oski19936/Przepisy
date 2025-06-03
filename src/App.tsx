@@ -16,8 +16,7 @@ interface Recipe {
   created_at?: string;
 }
 
-// Adres Twojego API (dokładnie tak, żeby odpowiadał https://przepisy.dkonto.pl/przepisy/api/...)
-const API_BASE = "https://przepisy.dkonto.pl/przepisy/api";
+const API_BASE = "https://przepisy.dkonto.pl/api";
 
 const App: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
