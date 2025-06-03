@@ -8,22 +8,15 @@ import React, {
 import "./App.css";
 
 interface Recipe {
+  id?: number;
   title: string;
   ingredients: string[];
   description: string;
   tags: string[];
+  created_at?: string;
 }
 
-const STORAGE_KEY = "recipeBook.recipes";
-
-function loadRecipes(): Recipe[] {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  return saved ? JSON.parse(saved) : [];
-}
-
-function saveRecipes(recipes: Recipe[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(recipes));
-}
+const API_BASE = "https://przepisy.dkonto.pl/przepisy/api";
 
 const App: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -37,12 +30,19 @@ const App: React.FC = () => {
   const tagsRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setRecipes(loadRecipes());
+    fetch(`${API_BASE}/getRecipes.php`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Błąd podczas pobierania");
+        return res.json();
+      })
+      .then((data: Recipe[]) => {
+        setRecipes(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Nie udało się pobrać przepisów z serwera.");
+      });
   }, []);
-
-  useEffect(() => {
-    saveRecipes(recipes);
-  }, [recipes]);
 
   const autoResize = (el: HTMLTextAreaElement | null) => {
     if (!el) return;
@@ -70,7 +70,7 @@ const App: React.FC = () => {
     setEditingIndex(null);
   };
 
-  const handleAdd = (e: FormEvent) => {
+  const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
     const title = titleRef.current!.value.trim();
     const ingredientsRaw = ingredientsRef.current!.value.trim();
@@ -88,9 +88,22 @@ const App: React.FC = () => {
       .split(",")
       .map((tg) => tg.trim())
       .filter((tg) => tg.startsWith("#") && tg.length > 1);
-    const newRecipe: Recipe = { title, ingredients, description, tags };
-    setRecipes([...recipes, newRecipe]);
-    resetForm();
+
+    const payload = { title, ingredients, description, tags };
+    try {
+      const res = await fetch(`${API_BASE}/saveRecipe.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Błąd zapisu do bazy");
+      const saved: Recipe = await res.json();
+      setRecipes((prev) => [saved, ...prev]);
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert("Nie udało się zapisać przepisu na serwerze.");
+    }
   };
 
   const startEditing = (index: number) => {
@@ -109,7 +122,7 @@ const App: React.FC = () => {
     setEditingIndex(index);
   };
 
-  const handleUpdate = (e: FormEvent) => {
+  const handleUpdate = async (e: FormEvent) => {
     e.preventDefault();
     if (editingIndex === null) return;
     const title = titleRef.current!.value.trim();
@@ -128,7 +141,15 @@ const App: React.FC = () => {
       .split(",")
       .map((tg) => tg.trim())
       .filter((tg) => tg.startsWith("#") && tg.length > 1);
-    const updated: Recipe = { title, ingredients, description, tags };
+
+    // (opcjonalnie) możesz wystawić updatePhp.php; na razie aktualizuj lokalnie:
+    const updated: Recipe = {
+      ...recipes[editingIndex],
+      title,
+      ingredients,
+      description,
+      tags,
+    };
     const newList = [...recipes];
     newList[editingIndex] = updated;
     setRecipes(newList);
@@ -253,7 +274,7 @@ const App: React.FC = () => {
           <input
             type="text"
             id="search"
-            placeholder="🔍 Szukaj przepisów... test"
+            placeholder="🔍 Szukaj przepisów..."
             value={filterText}
             onChange={onFilterChange}
           />
