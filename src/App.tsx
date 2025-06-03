@@ -32,14 +32,14 @@ const App: React.FC = () => {
   useEffect(() => {
     fetch(`${API_BASE}/getRecipes.php`)
       .then((res) => {
-        if (!res.ok) throw new Error("Błąd podczas pobierania");
+        if (!res.ok) return res.text().then((t) => Promise.reject(t));
         return res.json();
       })
       .then((data: Recipe[]) => {
         setRecipes(data);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("getRecipes error:", err);
         alert("Nie udało się pobrać przepisów z serwera.");
       });
   }, []);
@@ -96,13 +96,16 @@ const App: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Błąd zapisu do bazy");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Nieznany błąd zapisu");
+      }
       const saved: Recipe = await res.json();
       setRecipes((prev) => [saved, ...prev]);
       resetForm();
-    } catch (err) {
-      console.error(err);
-      alert("Nie udało się zapisać przepisu na serwerze.");
+    } catch (err: any) {
+      console.error("saveRecipe error:", err);
+      alert("Nie udało się zapisać przepisu. " + (err.message || ""));
     }
   };
 
@@ -122,7 +125,7 @@ const App: React.FC = () => {
     setEditingIndex(index);
   };
 
-  const handleUpdate = async (e: FormEvent) => {
+  const handleUpdate = (e: FormEvent) => {
     e.preventDefault();
     if (editingIndex === null) return;
     const title = titleRef.current!.value.trim();
@@ -142,7 +145,6 @@ const App: React.FC = () => {
       .map((tg) => tg.trim())
       .filter((tg) => tg.startsWith("#") && tg.length > 1);
 
-    // (opcjonalnie) możesz wystawić updatePhp.php; na razie aktualizuj lokalnie:
     const updated: Recipe = {
       ...recipes[editingIndex],
       title,
