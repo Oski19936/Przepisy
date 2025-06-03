@@ -16,6 +16,7 @@ interface Recipe {
   created_at?: string;
 }
 
+// Adres Twojego API (dokładnie tak, żeby odpowiadał https://przepisy.dkonto.pl/przepisy/api/...)
 const API_BASE = "https://przepisy.dkonto.pl/przepisy/api";
 
 const App: React.FC = () => {
@@ -29,15 +30,14 @@ const App: React.FC = () => {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const tagsRef = useRef<HTMLInputElement>(null);
 
+  // 1) Pobierz przepisy z bazy przy załadowaniu komponentu
   useEffect(() => {
     fetch(`${API_BASE}/getRecipes.php`)
       .then((res) => {
         if (!res.ok) return res.text().then((t) => Promise.reject(t));
         return res.json();
       })
-      .then((data: Recipe[]) => {
-        setRecipes(data);
-      })
+      .then((data: Recipe[]) => setRecipes(data))
       .catch((err) => {
         console.error("getRecipes error:", err);
         alert("Nie udało się pobrać przepisów z serwera.");
@@ -70,6 +70,7 @@ const App: React.FC = () => {
     setEditingIndex(null);
   };
 
+  // 2) Dodanie nowego przepisu – wysyłamy do saveRecipe.php
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
     const title = titleRef.current!.value.trim();
@@ -80,6 +81,7 @@ const App: React.FC = () => {
       alert("Wypełnij wszystkie pola przed dodaniem przepisu.");
       return;
     }
+
     const ingredients = ingredientsRaw
       .split(",")
       .map((ing) => ing.trim())
@@ -90,6 +92,7 @@ const App: React.FC = () => {
       .filter((tg) => tg.startsWith("#") && tg.length > 1);
 
     const payload = { title, ingredients, description, tags };
+
     try {
       const res = await fetch(`${API_BASE}/saveRecipe.php`, {
         method: "POST",
@@ -125,6 +128,7 @@ const App: React.FC = () => {
     setEditingIndex(index);
   };
 
+  // 3) Edycja tylko lokalnie (nie zapisujemy na serwer); jeśli wolisz serwerową edycję trzeba dodać updateRecipe.php
   const handleUpdate = (e: FormEvent) => {
     e.preventDefault();
     if (editingIndex === null) return;
@@ -158,10 +162,9 @@ const App: React.FC = () => {
     resetForm();
   };
 
-  const cancelEditing = () => {
-    resetForm();
-  };
+  const cancelEditing = () => resetForm();
 
+  // 4) Usuwanie tylko lokalnie (nie usuwamy z bazy)
   const handleDelete = (index: number) => {
     if (!window.confirm("Na pewno chcesz usunąć ten przepis?")) return;
     const newList = [...recipes];
