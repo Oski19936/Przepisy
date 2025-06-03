@@ -253,7 +253,7 @@ const App: React.FC = () => {
           <input
             type="text"
             id="search"
-            placeholder="🔍 Szukaj przepisów..."
+            placeholder="🔍 Szukaj przepisów... test"
             value={filterText}
             onChange={onFilterChange}
           />
