@@ -170,7 +170,7 @@ const App: React.FC = () => {
     if (!window.confirm("Na pewno chcesz usunąć ten przepis?")) return;
 
     try {
-      const res = await fetch(`${API_BASE}/removeRecipes.php`, {
+      const res = await fetch(`${API_BASE}/removeRecipe.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: recipe.id }),
