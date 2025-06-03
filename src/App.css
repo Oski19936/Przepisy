@@ -1,38 +1,349 @@
-.App {
+:root {
+  --primary-color: #4caf50;
+  --secondary-color: #f0f0f0;
+  --text-color: #333;
+  --button-color: #388e3c;
+  --button-hover: #2e7d32;
+  --delete-color: #e53935;
+  --delete-hover: #c62828;
+  --edit-color: #1976d2;
+  --edit-hover: #1565c0;
+  --input-border: #ccc;
+  --input-focus-border: #4caf50;
+  --ingredients-bg: #e8f5e9;
+  --description-bg: #fff8e1;
+  --tag-bg: rgba(231, 76, 60, 0.1);
+  --tag-color: #e74c3c;
+  --card-bg: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+header h1 {
+  margin: 0;
+  font-size: 1.8rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+main {
+  max-width: 1200px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* ========================= */
+/* 1. FORMULARZ DODAWANIA    */
+/* ========================= */
+.recipe-form {
+  background-color: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-form h2 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: var(--primary-color);
+}
+
+/* Wiersz górny: Tytuł + Składniki */
+.recipe-form .form-row-top {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.recipe-form .form-group {
+  flex: 1;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 1rem;
+}
+
+.recipe-form label {
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+/* Pola (input + textarea) */
+.recipe-form input[type="text"],
+.recipe-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  overflow: hidden;
+  resize: none;
+  height: auto;
+  min-height: 38px;
+}
+
+/* Drugi wiersz: Opis (100% szerokości) */
+.recipe-form .form-row-bottom {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.recipe-form .form-row-bottom .form-group {
+  width: 100%;
+}
+
+.recipe-form textarea {
+  line-height: 1.2;
+}
+
+.recipe-form input[type="text"]:focus,
+.recipe-form textarea:focus {
+  border-color: var(--input-focus-border);
+  outline: none;
+}
+
+/* Trzeci wiersz: Tagi (100% szerokości) */
+.recipe-form .form-row-tags {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.recipe-form .form-row-tags .form-group {
+  width: 100%;
+}
+
+.recipe-form input.tags-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.recipe-form input.tags-input:focus {
+  border-color: var(--input-focus-border);
+  outline: none;
+}
+
+.recipe-form .form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.recipe-form button {
+  background-color: var(--button-color);
   color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.App-link {
-  color: #61dafb;
+.recipe-form button:hover {
+  background-color: var(--button-hover);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+/* ========================= */
+/* 2. POLE WYSZUKIWANIA      */
+/* ========================= */
+#search {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  margin: 0 0 1rem 0;
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+#search:focus {
+  border-color: var(--input-focus-border);
+  outline: none;
+}
+
+/* ========================= */
+/* 3. KAFELKI PRZEPISÓW      */
+/* ========================= */
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1rem;
+}
+
+.recipe-item {
+  background-color: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.recipe-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+}
+
+.recipe-item-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  word-break: break-word;
+  flex: 1;
+}
+
+.recipe-item-header .buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.recipe-item-header button {
+  border: none;
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.recipe-item-header .delete-btn {
+  background-color: var(--delete-color);
+}
+
+.recipe-item-header .delete-btn:hover {
+  background-color: var(--delete-hover);
+}
+
+.recipe-item-header .edit-btn {
+  background-color: var(--edit-color);
+}
+
+.recipe-item-header .edit-btn:hover {
+  background-color: var(--edit-hover);
+}
+
+.recipe-content {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+/* ---- LEWA KOLUMNA: Składniki ---- */
+.recipe-ingredients {
+  flex: 0 0 35%;
+  max-width: 35%;
+  background-color: var(--ingredients-bg);
+  padding: 0.8rem;
+  border-radius: 3px;
+  word-break: normal;
+  white-space: normal;
+}
+
+.recipe-ingredients ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.recipe-ingredients li {
+  margin-bottom: 0.4rem;
+  text-indent: -1.2rem;
+  padding-left: 1.2rem;
+  word-break: normal;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* ---- PRAWA KOLUMNA: Opis ---- */
+.recipe-description {
+  flex: 0 0 60%;
+  max-width: 60%;
+  background-color: var(--description-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 3px;
+  padding: 0.8rem;
+  word-break: normal;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+/* ---- TAGI w kafelku ---- */
+.recipe-tags {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.recipe-tags span {
+  background-color: var(--tag-bg);
+  color: var(--tag-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+/* ========================= */
+/* 4. RESPONSYWNOŚĆ          */
+/* ========================= */
+@media (max-width: 800px) {
+  .recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
-  to {
-    transform: rotate(360deg);
+  .recipe-ingredients {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .recipe-description {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .recipe-form .form-row-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .recipe-form .form-row-bottom,
+  .recipe-form .form-row-tags {
+    display: block;
+  }
+  .recipe-ingredients,
+  .recipe-description {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
