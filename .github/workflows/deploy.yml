@@ -27,24 +27,20 @@ jobs:
       - name: Build React App
         run: npm run build
 
-      - name: Upload build folder via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: ${{ secrets.FTP_PORT || 21 }}
-          local-dir: build/
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}
+      - name: Move API catalog
+        run: mv api build/api
 
-      - name: Upload API folder via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: ${{ secrets.FTP_PORT || 21 }}
-          local-dir: api/
-          server-dir: ${{ secrets.FTP_REMOTE_DIR }}api/
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan oski1993.ssh.dhosting.pl >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server using SCP
+        env:
+          REMOTE_PATH: /home/klient.dhosting.pl/oski1993/przepisy.dkonto.pl/public_html
+          USERNAME: oski1993
+
+        run: |
+          scp -r -o StrictHostKeyChecking=no build/. "oski1993@oski1993.ssh.dhosting.pl"
